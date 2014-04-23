@@ -1,5 +1,13 @@
 Real World Haskell notes
 ======================
+##命名
+>>名字可包含字母，数字，符号`'`和`_`
+>>函数名，参数，变量，类型变量必须以小写字母或者`_`开头
+>>类型名和构造名必须以大写字母开头
+
+有效名字:
+    `x foldl' long_name unzip3 concatMap _yada `
+    `Bool Cons TreeNode Int `
 ##类型
 基本内置类型
 ```haskell
@@ -53,6 +61,8 @@ myDrop1 n [] = []
 myDrop1 n xs = myDrop1 (n-1) (tail xs)
 ```
 ##函数
+haskell函数名必须以小写字母开头
+类型名必须以大写字母开头
 数学意义上讲haskell只存在一个参数的函数，
 N个参数函数实际上是复合函数 g(x,y) = (f(x))(y)
 
@@ -86,12 +96,37 @@ f x y z = x + y + z
 x = 10 + 12
 y = (+) 10 12 -- 10和12是参数
 ```
+特殊函数
 
+列表构造操作符`:`
+`(:) :: a -> [a] -> [a]`
 ##自定义类型
+
 `data 类型名 = 类型值构造函数 组成值类型列表`
 `类型值构造函数` 返回一个对应类型的值
+
+`代数数据类型`
+不需要任何语言特性就可以实现c++ struct,union,enum这些功能
 ```haskell
+data JValue = JNull
+            |JBool Bool
+            |JInt Int
+            |JDouble Double
+            |JString String
+            |JObject [(String, JValue)]
+            |JArray [JValue]
+            deriving (Show)
+
+
 -- BookInfo 包含：Id 书名 作者
 data BookInfo = Book Int String [String]
                 deriving (Show)
+```
+
+`类型别名`
+`type` 类似c++ `typedef`
+```haskell
+type BookID = Int
+type Writer = [String]
+type BookName = String
 ```
