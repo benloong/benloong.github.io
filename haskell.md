@@ -1,9 +1,9 @@
 Real World Haskell notes
 ======================
 ##命名
->>名字可包含字母，数字，符号`'`和`_`
->>函数名，参数，变量，类型变量必须以小写字母或者`_`开头
->>类型名和构造名必须以大写字母开头
+* 名字可包含字母，数字，符号`'`和`_`
+* 函数名，参数，变量，类型变量必须以小写字母或者`_`开头
+* 类型名和构造名必须以大写字母开头
 
 有效名字:
     `x foldl' long_name unzip3 concatMap _yada `
@@ -45,9 +45,9 @@ y = 10::Double -- y is 10.0
 
 条件求值
 ```haskell
-if expr0
-then expr1 --缩进要和if一致
-else expr2 --缩进要和if一致
+fn = if expr0
+     then expr1 --缩进要和if一致
+     else expr2 --缩进要和if一致
 ```
 很多时候条件求值可以使用模式匹配替代
 ```haskell
@@ -130,3 +130,101 @@ type BookID = Int
 type Writer = [String]
 type BookName = String
 ```
+
+###local variable
+
+#### let in
+
+```haskell
+lend amount balance = let reserve    = 100
+                          newBalance = balance - amount
+                      in if balance < reserve
+                         then Nothing
+                         else Just newBalance
+```
+`let`代码块定义表达式名字，对应的`in`代码块里面使用这些表达式
+
+有点类似c++ Local Scope的东东，`let` 定义的变量只能在 对应的`in`代码块里使用
+
+`let` `in`可以嵌套，和c++类似最里层的变量名被优先使用
+```haskell
+bar = let x = 1
+      in ((let x = "foo" in x), x)
+--ghci> bar 
+--("foo",1)
+```
+
+####where 约束
+
+与`let`声明变量在前不同的是 `where`只能放在在函数尾部用于定义变量或者函数模式匹配，与SQL有相似性
+
+```haskell
+lend2 amount balance = if amount < reserve * 0.5
+                       then Just newBalance
+                       else Nothing
+    where reserve    = 100
+          newBalance = balance - amount
+
+pluralise :: String -> [Int] -> [String]
+pluralise word counts = map plural counts
+    where plural 0 = "no " ++ word ++ "s"
+          plural 1 = "one " ++ word
+          plural n = show n ++ " " ++ word ++ "s"
+```
+
+####缩进
+
+同一个scope的缩进要保持一致
+
+####case表达式
+
+函数内模式匹配
+
+`case` 变量 `of`
+
+从上到下匹配表达式列表
+
+表达式列表类型需一致
+
+```haskell
+fromMaybe defval wrapped =
+    case wrapped of
+      Nothing     -> defval
+      Just value  -> value
+```
+
+####条件求值guard `|`
+
+```haskell
+nodesAreSame (Node a _ _) (Node b _ _)
+    | a == b     = Just a
+nodesAreSame _ _ = Nothing --模式匹配
+
+lend3 amount balance
+     | amount <= 0            = Nothing
+     | amount > reserve * 0.5 = Nothing
+     | otherwise              = Just newBalance
+    where reserve    = 100
+          newBalance = balance - amount
+
+--naive版本
+myDrop n xs = if n <=0 || null xs
+              then xs
+              else myDrop (n-1) (tail xs)
+--函数模式匹配版本
+myDrop1 0 xs      = xs
+myDrop1 n []      = []
+myDrop1 n (x:xs)  = myDrop1 (n-1) xs
+--使用条件求值guard的版本
+niceDrop n xs | n <= 0 = xs
+niceDrop _ []          = []
+niceDrop n (_:xs)      = niceDrop (n-1) xs
+```
+
+####尾递归 `CPS`
+`CPS` `Continuation-passing style`
+
+myLengthTail xs = myLengthTailHelp 0 xs
+
+myLengthTailHelp n [] = n
+myLengthTailHelp n (x:xs) = myLengthTailHelp (n + 1) xs
