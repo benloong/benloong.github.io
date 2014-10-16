@@ -24,3 +24,14 @@ IEnumerator Start() {
     ((AssetBundle)dependency).Unload(false);
 }
 ```
+
+
+###APK 打包出错
+
+`invocation failed`
+
+`not a file`
+
+错误原因是设置keystore出错，没有找到正确的keypass
+
+http://answers.unity3d.com/questions/621759/building-error-not-a-file-.html
