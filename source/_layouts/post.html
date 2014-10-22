@@ -9,7 +9,11 @@ single: true
   <footer>
     <p class="meta">
       {% include post/author.html %}
+<<<<<<< HEAD
       {% include post/date.html %}{{ time }}{% if updated %} {{ updated }}{% endif %}
+=======
+      {% include post/date.html %}{% if updated %}{{ updated }}{% else %}{{ time }}{% endif %}
+>>>>>>> ec4281edea0f802ac1064ae077ed2a4bfeb08519
       {% include post/categories.html %}
     </p>
     {% unless page.sharing == false %}
