@@ -1,10 +1,3 @@
-<<<<<<< HEAD
-{% if page.date %}{% capture time %}{{ page.date_time_html }}{% endcapture %}{% endif %}
-{% if post.date %}{% capture time %}{{ post.date_time_html }}{% endcapture %}{% endif %}
-
-{% if page.updated %}{% capture updated %}{{ page.date_time_updated_html }}{% endcapture %}{% endif %}
-{% if post.updated %}{% capture updated %}{{ post.date_time_updated_html }}{% endcapture %}{% endif %}
-=======
 {% capture date %}{{ page.date }}{{ post.date }}{% endcapture %}
 {% capture date_formatted %}{{ page.date_formatted }}{{ post.date_formatted }}{% endcapture %}
 {% capture has_date %}{{ date | size }}{% endcapture %}
@@ -20,4 +13,3 @@
 {% if was_updated != '0' %}
   {% capture updated %}<time datetime="{{ updated | datetime | date_to_xmlschema }}" class="updated">Updated {{ updated_formatted }}</time>{% endcapture %}
 {% else %}{% assign updated = false %}{% endif %}
->>>>>>> ec4281edea0f802ac1064ae077ed2a4bfeb08519
