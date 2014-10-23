@@ -1,0 +1,6 @@
+[submodule ".themes/BoldAndBlue"]
+	path = .themes/BoldAndBlue
+	url = https://github.com/johnkeith/boldandblue.git
+[submodule ".themes/jitheme"]
+	path = .themes/jitheme
+	url = https://github.com/ivanjovanovic/ji-octopress-theme.git
