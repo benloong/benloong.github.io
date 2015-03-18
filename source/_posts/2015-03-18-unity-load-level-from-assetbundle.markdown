@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Unity Load Level From AssetBundle"
+title: "Unity从AssetBundle加载场景"
 date: 2015-03-18 05:55:37 +0000
 comments: true
 categories: Unity
