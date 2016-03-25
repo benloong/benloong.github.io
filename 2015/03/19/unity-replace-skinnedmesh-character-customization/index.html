@@ -1,223 +1,81 @@
-<!DOCTYPE html>
+<!DOCTYPE HTML>
 <html>
 <head>
   <meta charset="utf-8">
   
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <title>Unity: 自定义角色中的蒙皮网格替换 | Alt Dev Blog</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="Unity允许运行时替换SkinnedMeshRenderer的网格来实现自定义角色部件，分两种情况Optimize Game Objects 于 Nonoptimized GameObjects
-Optimize Game Objects是模型Rig选项，开启后骨架不会在场景中存在，而是放入了内部存储。这种情况下只需简单替换mesh就行，不需要重新设置骨骼信息
-123456public stat">
-<meta property="og:type" content="article">
-<meta property="og:title" content="Unity: 自定义角色中的蒙皮网格替换">
-<meta property="og:url" content="http://altdev.io/2015/03/19/unity-replace-skinnedmesh-character-customization/index.html">
-<meta property="og:site_name" content="Alt Dev Blog">
-<meta property="og:description" content="Unity允许运行时替换SkinnedMeshRenderer的网格来实现自定义角色部件，分两种情况Optimize Game Objects 于 Nonoptimized GameObjects
-Optimize Game Objects是模型Rig选项，开启后骨架不会在场景中存在，而是放入了内部存储。这种情况下只需简单替换mesh就行，不需要重新设置骨骼信息
-123456public stat">
-<meta property="og:updated_time" content="2016-03-18T01:23:54.503Z">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Unity: 自定义角色中的蒙皮网格替换">
-<meta name="twitter:description" content="Unity允许运行时替换SkinnedMeshRenderer的网格来实现自定义角色部件，分两种情况Optimize Game Objects 于 Nonoptimized GameObjects
-Optimize Game Objects是模型Rig选项，开启后骨架不会在场景中存在，而是放入了内部存储。这种情况下只需简单替换mesh就行，不需要重新设置骨骼信息
-123456public stat">
+  <title>Unity: 自定义角色中的蒙皮网格替换 | Alt Dev Blog | Develop Blog</title>
+  <meta name="author" content="BenLoong">
   
-    <link rel="alternative" href="/atom.xml" title="Alt Dev Blog" type="application/atom+xml">
+  <meta name="description" content="Programming my world.">
   
   
-    <link rel="icon" href="/favicon.png">
+
+  <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <meta property="og:title" content="Unity: 自定义角色中的蒙皮网格替换"/>
+  <meta property="og:site_name" content="Alt Dev Blog"/>
+
   
-  <link rel="stylesheet" href="/css/style.css">
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="Alt Dev Blog" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
 </head>
 
+
 <body>
-  <div id="container">
-    <div class="left-col">
-    <div class="overlay"></div>
-<div class="intrude-less">
-	<header id="header" class="inner">
-		<a href="/" class="profilepic">
-			
-			<img lazy-src="/avatar.png" class="js-avatar">
-			
-		</a>
+<div id="page" class="site">
+  <div id="primary" class="content-area">
 
-		<hgroup>
-		  <h1 class="header-author"><a href="/">BenLoong</a></h1>
-		</hgroup>
-
-		
-		<p class="header-subtitle">Develop Blog</p>
-		
-
-		
-			<div class="switch-btn">
-				<div class="icon">
-					<div class="icon-ctn">
-						<div class="icon-wrap icon-house" data-idx="0">
-							<div class="birdhouse"></div>
-							<div class="birdhouse_holes"></div>
-						</div>
-						<div class="icon-wrap icon-ribbon hide" data-idx="1">
-							<div class="ribbon"></div>
-						</div>
-						
-						
-						<div class="icon-wrap icon-me hide" data-idx="3">
-							<div class="user"></div>
-							<div class="shoulder"></div>
-						</div>
-						
-					</div>
-					
-				</div>
-				<div class="tips-box hide">
-					<div class="tips-arrow"></div>
-					<ul class="tips-inner">
-						<li>菜单</li>
-						<li>标签</li>
-						
-						
-						<li>关于我</li>
-						
-					</ul>
-				</div>
-			</div>
-		
-
-		<div class="switch-area">
-			<div class="switch-wrap">
-				<section class="switch-part switch-part1">
-					<nav class="header-menu">
-						<ul>
-						
-							<li><a href="/">主页</a></li>
-				        
-							<li><a href="/archives">所有文章</a></li>
-				        
-						</ul>
-					</nav>
-					<nav class="header-nav">
-						<div class="social">
-							
-								<a class="github" target="_blank" href="https://github.com/benloong" title="github">github</a>
-					        
-								<a class="weibo" target="_blank" href="http://weibo.com/bugizmo" title="weibo">weibo</a>
-					        
-								<a class="twitter" target="_blank" href="https://twitter.com/ben1ong" title="twitter">twitter</a>
-					        
-						</div>
-					</nav>
-				</section>
-				
-				
-				<section class="switch-part switch-part2">
-					<div class="widget tagcloud" id="js-tagcloud">
-						<a href="/tags/GameDev/" style="font-size: 15px;">GameDev</a> <a href="/tags/Unity/" style="font-size: 20px;">Unity</a> <a href="/tags/iOS/" style="font-size: 10px;">iOS</a>
-					</div>
-				</section>
-				
-				
-				
-
-				
-				
-				<section class="switch-part switch-part3">
-				
-					<div id="js-aboutme">Programming...</div>
-				</section>
-				
-			</div>
-		</div>
-	</header>				
+    <header id="header" class="inner"><div class="site-branding">
+  <h1 class="site-title">
+    <a href="/">Alt Dev Blog</a>
+  </h1>
+  <p class="site-description">Develop Blog</p>
 </div>
+<nav id="site-navigation" class="main-navigation" role="navigation">
+  <ul>
+    
+      <li><a href="/">主页</a></li>
+    
+      <li><a href="/archives">归档</a></li>
+    
+      <li><a href="/categories">分类</a></li>
+    
+      <li><a href="/tags">标签</a></li>
+    
+  </ul>
+</nav></header>
 
-    </div>
-    <div class="mid-col">
-      <nav id="mobile-nav">
-  	<div class="overlay">
-  		<div class="slider-trigger"></div>
-  		<h1 class="header-author js-mobile-header hide">BenLoong</h1>
-  	</div>
-	<div class="intrude-less">
-		<header id="header" class="inner">
-			<div class="profilepic">
-			
-				<img lazy-src="/avatar.png" class="js-avatar">
-			
-			</div>
-			<hgroup>
-			  <h1 class="header-author">BenLoong</h1>
-			</hgroup>
-			
-			<p class="header-subtitle">Develop Blog</p>
-			
-			<nav class="header-menu">
-				<ul>
-				
-					<li><a href="/">主页</a></li>
-		        
-					<li><a href="/archives">所有文章</a></li>
-		        
-		        <div class="clearfix"></div>
-				</ul>
-			</nav>
-			<nav class="header-nav">
-				<div class="social">
-					
-						<a class="github" target="_blank" href="https://github.com/benloong" title="github">github</a>
-			        
-						<a class="weibo" target="_blank" href="http://weibo.com/bugizmo" title="weibo">weibo</a>
-			        
-						<a class="twitter" target="_blank" href="https://twitter.com/ben1ong" title="twitter">twitter</a>
-			        
-				</div>
-			</nav>
-		</header>				
-	</div>
-</nav>
+    <article id="content" class="site-content">
+      <main id="main" class="site-main posts-loop" role="main">
+        <article class="post article">
 
-      <div class="body-wrap"><article id="post-unity-replace-skinnedmesh-character-customization" class="article article-type-post" itemscope itemprop="blogPost">
   
-    <div class="article-meta">
-      <a href="/2015/03/19/unity-replace-skinnedmesh-character-customization/" class="article-date">
-  	<time datetime="2015-03-19T00:47:55.000Z" itemprop="datePublished">2015-03-19</time>
-</a>
-    </div>
   
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 class="article-title" itemprop="name">
-      Unity: 自定义角色中的蒙皮网格替换
-    </h1>
+    <h3 class="article-title"><span>Unity: 自定义角色中的蒙皮网格替换</span></h3>
   
 
-      </header>
-      
-      <div class="article-info article-info-post">
-        
-	<div class="article-tag tagcloud">
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/GameDev/">GameDev</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Unity/">Unity</a></li></ul>
-	</div>
 
-        
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/Unity/">Unity</a>
-	</div>
+  <div class="article-top-meta">
+    <span class="posted-on">
+      <a href="/2015/03/19/unity-replace-skinnedmesh-character-customization/" rel="bookmark">
+        <time class="entry-date published" datetime="2015-03-19T00:47:55.000Z">
+          2015-03-19
+        </time>
+      </a>
+    </span>
+  </div>
 
 
-        <div class="clearfix"></div>
-      </div>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
+  
+
+  <div class="article-content">
+    <div class="entry">
       
         <p>Unity允许运行时替换SkinnedMeshRenderer的网格来实现自定义角色部件，分两种情况<code>Optimize Game Objects</code> 于 <code>Nonoptimized GameObjects</code></p>
 <p><code>Optimize Game Objects</code>是模型Rig选项，开启后骨架不会在场景中存在，而是放入了内部存储。这种情况下只需简单替换mesh就行，不需要重新设置骨骼信息</p>
@@ -226,138 +84,71 @@ Optimize Game Objects是模型Rig选项，开启后骨架不会在场景中存�
 <figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">ReplaceSkinnedMeshNonOptimized</span>(<span class="params">SkinnedMeshRenderer src, SkinnedMeshRenderer dst</span>)</span><br><span class="line"></span>&#123;</span><br><span class="line">    Dictionary&lt;<span class="keyword">string</span>, Transform&gt; skeleton = <span class="keyword">new</span> Dictionary&lt;<span class="keyword">string</span>, Transform&gt;();</span><br><span class="line">    Transform[] allTrans =  dst.transform.GetComponentsInChildren&lt;Transform&gt;(<span class="keyword">true</span>);</span><br><span class="line">    <span class="keyword">foreach</span> (<span class="keyword">var</span> item <span class="keyword">in</span> allTrans)</span><br><span class="line">    &#123;</span><br><span class="line">        skeleton[item.name] = item;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    dst.sharedMaterials = src.sharedMaterials;</span><br><span class="line">    dst.sharedMesh = src.sharedMesh;</span><br><span class="line">    Transform[] bones = <span class="keyword">new</span> Transform[src.bones.Length];</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> ii = <span class="number">0</span>; ii &lt; bones.Length; ii++)</span><br><span class="line">    &#123;</span><br><span class="line">        bones[ii] = skeleton[src.bones[ii].name];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    dst.bones = bones;</span><br><span class="line">    dst.rootBone = skeleton[src.rootBone.name];</span><br><span class="line">    dst.localBounds = src.localBounds;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
       
     </div>
-    
-  </div>
+    <footer class="article-footer">
+        <div class="article-meta pull-left">
+          <span class="post-categories">
+            <i class="icon-categories"></i>
+            
   
-    
-<nav id="article-nav">
-  
-    <a href="/2016/03/15/iOS-ViewController入门/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption"><</strong>
-      <div class="article-nav-title">
-        
-          iOS ViewController入门
-        
-      </div>
-    </a>
-  
-  
-    <a href="/2015/03/17/unity-load-level-from-assetbundle/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">Unity从AssetBundle加载场景</div>
-      <strong class="article-nav-caption">></strong>
-    </a>
-  
-</nav>
 
+  <a href="/categories/Unity/">Unity</a>
+
+
+          </span>
+          <span class="post-tags">
+            <i class="icon-tags"></i>
+            
   
+
+  <a href="/tags/Unity/">Unity</a>, <a href="/tags/GameDev/">GameDev</a>
+
+
+          </span>
+        </div>
+        
+    </footer>
+  </div>
 </article>
 
-
-<div class="share_jia">
-	<!-- JiaThis Button BEGIN -->
-	<div class="jiathis_style">
-		<span class="jiathis_txt">分享到: &nbsp; </span>
-		<a class="jiathis_button_facebook"></a> 
-    <a class="jiathis_button_twitter"></a>
-    <a class="jiathis_button_plus"></a> 
-    <a class="jiathis_button_tsina"></a>
-		<a class="jiathis_button_cqq"></a>
-		<a class="jiathis_button_douban"></a>
-		<a class="jiathis_button_weixin"></a>
-		<a class="jiathis_button_tumblr"></a>
-    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
-	</div>
-	<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
-	<!-- JiaThis Button END -->
-</div>
+  
+<div id="comment">
 
 
-
-
-
-
-<div class="duoshuo">
-	<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="unity-replace-skinnedmesh-character-customization" data-title="Unity: 自定义角色中的蒙皮网格替换" data-url="http://altdev.io/2015/03/19/unity-replace-skinnedmesh-character-customization/"></div>
-	<!-- 多说评论框 end -->
-	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
-	<script type="text/javascript">
-	var duoshuoQuery = {short_name:"altdev"};
-	(function() {
-		var ds = document.createElement('script');
-		ds.type = 'text/javascript';ds.async = true;
-		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
-		ds.charset = 'UTF-8';
-		(document.getElementsByTagName('head')[0] 
-		 || document.getElementsByTagName('body')[0]).appendChild(ds);
-	})();
-	</script>
-	<!-- 多说公共JS代码 end -->
-</div>
-
-
-
+<!-- 多说评论框 start -->
+ <div class="ds-thread" data-thread-key="/2015/03/19/unity-replace-skinnedmesh-character-customization/" data-title="Unity: 自定义角色中的蒙皮网格替换" data-url="http://altdev.io/2015/03/19/unity-replace-skinnedmesh-character-customization/"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"altdev"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] 
+     || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+  </script>
+<!-- 多说公共JS代码 end -->
 
 </div>
-      <footer id="footer">
-  <div class="outer">
-    <div id="footer-info">
-    	<div class="footer-left">
-    		&copy; 2016 BenLoong
-    	</div>
-      	<div class="footer-right">
-      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
-      	</div>
-    </div>
-  </div>
-</footer>
-    </div>
+
+
+      </main>
+    </article>
+
+    <footer id="colophon" class="site-footer" role="contentinfo"><div class="site-info">
+  <p class="meta">
+    Proudly powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and
+    Theme by <a href="https://github.com/CodeDaraW/Hacker" target="_blank">Hacker</a>
+    </br>
     
-  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
-
-
-<script>
-	var yiliaConfig = {
-		fancybox: true,
-		mathjax: true,
-		animate: true,
-		isHome: false,
-		isPost: true,
-		isArchive: false,
-		isTag: false,
-		isCategory: false,
-		open_in_new: false
-	}
-</script>
-<script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
-<script src="/js/main.js"></script>
-
-
-
-
-
-
-<script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-    tex2jax: {
-        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-        processEscapes: true,
-        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-    }
-});
-
-MathJax.Hub.Queue(function() {
-    var all = MathJax.Hub.getAllJax(), i;
-    for(i=0; i < all.length; i += 1) {
-        all[i].SourceElement().parentNode.className += ' has-jax';                 
-    }       
-});
-</script>
-
-<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-</script>
-
-
+    &copy; 2016 BenLoong
+    
+  </p>
+</div></footer>
+    
   </div>
+</div>
 </body>
 </html>
