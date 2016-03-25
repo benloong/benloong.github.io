@@ -1,0 +1,35 @@
+<h1 id="jQuery-scrollintoview-plugin-with-scrollable-selector-filter"><a href="#jQuery-scrollintoview-plugin-with-scrollable-selector-filter" class="headerlink" title="jQuery .scrollintoview() plugin (with :scrollable selector filter)"></a>jQuery .scrollintoview() plugin <sup>(with :scrollable selector filter)</sup></h1><p>This plugin makes it easy to scroll any element on your page into view. It scrolls in a user friendly way using animation (speed can be configured) so users never loose track where they moved within the current page. Default browser functionality simply jumps to some element which may confuse users greatly. This kind of behaviour is considered bad user experience, since pages look different above and below the fold. This means that users may as well think they were redirected to a different site (since it looks different) or at least page within the same site.</p>
+<h2 id="How-to-use-this-plugin"><a href="#How-to-use-this-plugin" class="headerlink" title="How to use this plugin"></a>How to use this plugin</h2><p>Usage is very simple and straightforward:</p>
+<pre><code class="javascript">$(<span class="string">"some_selector"</span>).scrollintoview();
+</code></pre>
+<p>And that’s it really. This is of course if we use defaults. It also supports some configuration possibilities that should be provided as an <code>options</code> object along with the call:</p>
+<ul>
+<li><strong>duration</strong> (default: “fast”) - specified the same as with jQuery animate function; it can be provided as a string (slow, normal, fast) or a number of milliseconds that specifies animation duration</li>
+<li><strong>direction</strong> (default: “both”) - scrolling can be performed in three different directions:<ul>
+<li><strong>x</strong> or <strong>horizontal</strong></li>
+<li><strong>y</strong> or <strong>vertical</strong></li>
+<li><strong>both</strong> - scrolling will perform in both directions; since scrolling is performed only when element is actually out of view this simply means that scrolling may only perform in one direction even though you set it to scroll in both directions; <em>both</em> is therefore the most reliable scrolling option that will make sure your element will be visible</li>
+</ul>
+</li>
+<li><strong>complete</strong> function - this is the complete handler function that will get called when scrolling completes; it runs in context of scrollable element; this function will be called regardless whether scrolling will perform or not (when element already in view); <em>but</em> it won’t get called when there’s no scrollable element (context can’t be determined)</li>
+</ul>
+<pre><code class="javascript">$(<span class="string">"some_selector"</span>).scrollintoview({
+    duration: <span class="number">2500</span>,
+    direction: <span class="string">"vertical"</span>,
+    complete: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>{
+        <span class="comment">// highlight the element so user's focus gets where it needs to be</span>
+    }
+});
+</code></pre>
+<h2 id="How-does-this-plugin-solve-the-user-experience-issue"><a href="#How-does-this-plugin-solve-the-user-experience-issue" class="headerlink" title="How does this plugin solve the user experience issue"></a>How does this plugin solve the user experience issue</h2><p>This plugin scrolls a particular element into view similar to browser built-in functionality (DOM’s <code>scrollIntoView()</code> function), but works differently (and arguably more user friendly):</p>
+<ul>
+<li>it only scrolls to element when element is actually out of view; if element is in view (anywhere in visible document area), no scrolling will be performed;</li>
+<li>it scrolls using animation effects; when scrolling is performed users know exactly they’re not redirected anywhere, but actually see that they’re simply moved somewhere else within the same page (as well as in which direction they moved);</li>
+<li>there’s always the smallest amount of scrolling being applied; when element is above the visible document area it will be scrolled to the top of visible area; when element is below the visible are it will be scrolled to the bottom of visible area; this is the most consistent way of scrolling - when scrolling would always be to top it sometimes couldn’t scroll an element to top when it was close to the bottom of scrollable container (thus scrolling would be unpredictable);</li>
+<li>when element’s size exceeds the size of visible document area its top-left corner is the one that will be scrolled to;</li>
+</ul>
+<h2 id="What-about-scrollable-selector-filter"><a href="#What-about-scrollable-selector-filter" class="headerlink" title="What about :scrollable selector filter"></a>What about :scrollable selector filter</h2><p>The good thing about this plugin is that you don’t have to provide two elements: scrollable ancestor and element that will be scrolled into view. This plugin rather searches for the closest scrollable ancestor. By <em>scrollable</em> it means that its content exceeds its view area and that is also displays scrollbars (using <code>overflow:hidden</code> won’t select element as scrollable). This checking is therefore implemented as a <code>:scrollable</code> selector filter that anyone can use.</p>
+<pre><code class="javascript"><span class="keyword">var</span> scrollableDivs = $(<span class="string">"div:scrollable"</span>);
+</code></pre>
+<p>This code would select all <code>DIV</code> elements that have scroll bars (at least one) and their content exceeds their visible area (at least in direction that can be scrolled using scroll bar).</p>
+<p><a href="http://erraticdev.blogspot.com/2011/02/jquery-scroll-into-view-plugin-with.html">See blog post for details</a>.</p>
