@@ -1,0 +1,623 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="coroutine," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.5.0" />
+
+
+
+
+
+
+<meta name="description" content="本文介绍几种Unity协程中自定义yield语句的方法，并对比其在5.3版本和旧版本的中实现的区别。
+引言Unity中Coroutine非常好用，但是5.3之前的版本不能优雅的实现自定义yield语句。Unity5.3中引入了CustomYieldInstruction类并改变了一些内部yield 语句规则，让我们优雅的实现自定义yield语句。
+继承CustomYieldInstruction5">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Unity 5.3版本中协程自定义yield语句">
+<meta property="og:url" content="http://altdev.io/2016/03/27/unity-new-coroutine-custom-yield-instruction/index.html">
+<meta property="og:site_name" content="Alt Dev Blog">
+<meta property="og:description" content="本文介绍几种Unity协程中自定义yield语句的方法，并对比其在5.3版本和旧版本的中实现的区别。
+引言Unity中Coroutine非常好用，但是5.3之前的版本不能优雅的实现自定义yield语句。Unity5.3中引入了CustomYieldInstruction类并改变了一些内部yield 语句规则，让我们优雅的实现自定义yield语句。
+继承CustomYieldInstruction5">
+<meta property="og:updated_time" content="2016-03-28T02:11:11.185Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Unity 5.3版本中协程自定义yield语句">
+<meta name="twitter:description" content="本文介绍几种Unity协程中自定义yield语句的方法，并对比其在5.3版本和旧版本的中实现的区别。
+引言Unity中Coroutine非常好用，但是5.3之前的版本不能优雅的实现自定义yield语句。Unity5.3中引入了CustomYieldInstruction类并改变了一些内部yield 语句规则，让我们优雅的实现自定义yield语句。
+继承CustomYieldInstruction5">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 14006424,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> Unity 5.3版本中协程自定义yield语句 | Alt Dev Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">Alt Dev Blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">Develop Blog</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-th fa-fw"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Unity 5.3版本中协程自定义yield语句
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-03-28T02:09:21+08:00" content="2016-03-28">
+              2016-03-28
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Unity/" itemprop="url" rel="index">
+                    <span itemprop="name">Unity</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/03/27/unity-new-coroutine-custom-yield-instruction/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/03/27/unity-new-coroutine-custom-yield-instruction/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本文介绍几种Unity协程中自定义yield语句的方法，并对比其在5.3版本和旧版本的中实现的区别。</p>
+<h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>Unity中<code>Coroutine</code>非常好用，但是5.3之前的版本不能优雅的实现自定义yield语句。Unity5.3中引入了<code>CustomYieldInstruction</code>类并改变了一些内部yield 语句规则，让我们优雅的实现自定义yield语句。</p>
+<h1 id="继承CustomYieldInstruction"><a href="#继承CustomYieldInstruction" class="headerlink" title="继承CustomYieldInstruction"></a>继承<code>CustomYieldInstruction</code></h1><p>5.3引入了新的类<code>CustomYieldInstruction</code>使开发者可以自定义yield语句。通过继承<code>CustomYieldInstruction</code> override <code>keepWaiting</code> 的值决定是否暂停该协程。<br><figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">CustomWaitForSeconds</span> : <span class="title">CustomYieldInstruction</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">float</span> until;</span><br><span class="line">    <span class="comment">// 上层协程（枚举器）是否继续等待</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">override</span> <span class="keyword">bool</span> keepWaiting</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">get</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">return</span> Time.unscaledTime &lt; until;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">CustomWaitForSeconds</span>(<span class="params"><span class="keyword">float</span> seconds</span>)</span><br><span class="line">    </span>&#123;</span><br><span class="line">        until = Time.unscaledTime + seconds;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">WaitForSecondsTest</span> : <span class="title">MonoBehaviour</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="function">IEnumerator <span class="title">Start</span>(<span class="params"></span>)</span><br><span class="line">    </span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">yield</span> return new <span class="title">CustomWaitForSeconds</span>(<span class="params"><span class="number">5</span></span>)</span>;</span><br><span class="line">        Debug.Log(<span class="string">"5 seconds elapsed..."</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h1 id="IEnumerator接口"><a href="#IEnumerator接口" class="headerlink" title="IEnumerator接口"></a>IEnumerator接口</h1><p>我们也可以通过实现<code>IEnumerator</code>接口来实现自定义yield语句。接口<code>MoveNext()</code>返回布尔值觉得决定上层协程（枚举器）是否继续等待。但是之前的版本中代码中要这样<code>yield return StartCoroutine(enumerator);</code>, 手动启动一个子协程，等待这个子协程执行完毕。5.3版本简化了这种写法， 协程（枚举器）<code>IEnumerator</code>的<code>Current</code>对象是实现了<code>IEnumerator</code>接口的话，则会等待这个子协程对象遍历完毕后才继续执行（<a href="http://docs.unity3d.com/ScriptReference/CustomYieldInstruction.html" target="_blank" rel="external">文档</a>）。 也就是父协程（枚举器）会等待<code>Current</code>子协程（枚举器）执行完毕(<code>Current</code>对象实现了<code>IEnumerator</code>）才会继续执行。 所以新版本中只需要<code>yield return enumerator;</code>就可以了， Unity内部会自动开启子协程。<br><figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">WaitForSecondsUnscaled</span> : <span class="title">IEnumerator</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">float</span> until;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">object</span> Current &#123; <span class="keyword">get</span> &#123; <span class="keyword">return</span> <span class="keyword">null</span>; &#125; &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">WaitForSecondsUnscaled</span>(<span class="params"><span class="keyword">float</span> seconds</span>)</span><br><span class="line">    </span>&#123;</span><br><span class="line">        seconds = Mathf.Max(seconds, <span class="number">0</span>);</span><br><span class="line">        until = Time.unscaledTime + seconds;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 返回为true则父协程暂停，等待该协程继续执行；返回为false父协程继续执行</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">bool</span> <span class="title">MoveNext</span>(<span class="params"></span>)</span><br><span class="line">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Time.unscaledTime &lt; until;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">Reset</span>(<span class="params"></span>)</span><br><span class="line">    </span>&#123;</span><br><span class="line">        until = <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">WaitForSecondsTest</span> : <span class="title">MonoBehaviour</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="function">IEnumerator <span class="title">Start</span>(<span class="params"></span>)</span><br><span class="line">    </span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">yield</span> return new <span class="title">CustomWaitForSeconds</span>(<span class="params"><span class="number">5</span></span>)</span>;</span><br><span class="line">        Debug.Log(<span class="string">"5 seconds elapsed..."</span>);</span><br><span class="line">        <span class="comment">// 新方式</span></span><br><span class="line">        <span class="function"><span class="keyword">yield</span> return new <span class="title">WaitForSecondsUnscaled</span>(<span class="params"><span class="number">5</span></span>)</span>;</span><br><span class="line">        <span class="comment">// 旧方式</span></span><br><span class="line">        <span class="comment">//yield return StartCoroutine(new WaitForSecondsUnscaled(5));</span></span><br><span class="line">        Debug.Log(<span class="string">"10 seconds elapsed..."</span>);</span><br><span class="line">        <span class="comment">// 新方式</span></span><br><span class="line">        <span class="function"><span class="keyword">yield</span> return <span class="title">WaitUntilUnscaled</span>(<span class="params">Time.unscaledTime + <span class="number">5</span></span>)</span>;</span><br><span class="line">        <span class="comment">// 旧方式</span></span><br><span class="line">        <span class="comment">//yield return StartCoroutine(WaitUntilUnscaled(Time.unscaledTime + 5));</span></span><br><span class="line">        Debug.Log(<span class="string">"15 seconds elapsed..."</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 返回IEnumerator接口实例的函数</span></span><br><span class="line">    <span class="function">IEnumerator <span class="title">WaitUntilUnscaled</span>(<span class="params"><span class="keyword">float</span> until</span>)</span><br><span class="line">    </span>&#123;</span><br><span class="line">        <span class="keyword">while</span> (Time.unscaledTime &lt; until)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">yield</span> <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h1 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h1><p>上面两个例子可以看出5.3版本中的自定义yield语句非常好用，对比旧版本更清晰更直观。请记住协程好用但是不能滥用。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/coroutine/" rel="tag">#coroutine</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/03/24/unity5-3-scene-management/" rel="next" title="Unity5.3新版场景管理">
+                <i class="fa fa-chevron-left"></i> Unity5.3新版场景管理
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <div class="ds-share flat" data-thread-key="2016/03/27/unity-new-coroutine-custom-yield-instruction/"
+     data-title="Unity 5.3版本中协程自定义yield语句"
+     data-content=""
+     data-url="http://altdev.io/2016/03/27/unity-new-coroutine-custom-yield-instruction/">
+  <div class="ds-share-inline">
+    <ul  class="ds-share-icons-16">
+
+      <li data-toggle="ds-share-icons-more"><a class="ds-more" href="javascript:void(0);">分享到：</a></li>
+      <li><a class="ds-weibo" href="javascript:void(0);" data-service="weibo">微博</a></li>
+      <li><a class="ds-qzone" href="javascript:void(0);" data-service="qzone">QQ空间</a></li>
+      <li><a class="ds-qqt" href="javascript:void(0);" data-service="qqt">腾讯微博</a></li>
+      <li><a class="ds-wechat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+
+    </ul>
+    <div class="ds-share-icons-more">
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/03/27/unity-new-coroutine-custom-yield-instruction/"
+           data-title="Unity 5.3版本中协程自定义yield语句" data-url="http://altdev.io/2016/03/27/unity-new-coroutine-custom-yield-instruction/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/avatar.png"
+               alt="BenLoong" />
+          <p class="site-author-name" itemprop="name">BenLoong</p>
+          <p class="site-description motion-element" itemprop="description">Programming my world.</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">5</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/benloong" target="_blank">
+                  
+                    <i class="fa fa-github"></i> GitHub
+                  
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/bugizmo" target="_blank">
+                  
+                    <i class="fa fa-weibo"></i> Weibo
+                  
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/ben1ong" target="_blank">
+                  
+                    <i class="fa fa-twitter"></i> Twitter
+                  
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        <div class="links-of-blogroll motion-element">
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#继承CustomYieldInstruction"><span class="nav-number">2.</span> <span class="nav-text">继承CustomYieldInstruction</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#IEnumerator接口"><span class="nav-number">3.</span> <span class="nav-text">IEnumerator接口</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#结语"><span class="nav-number">4.</span> <span class="nav-text">结语</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">BenLoong</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+
+  
+
+
+
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=0.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=0.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=0.5.0"></script>
+<script type="text/javascript" src="/vendors/jquery-scrollintoview/jquery.scrollintoview.min.js?v=0.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=0.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=0.5.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"altdev"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+  
+
+
+
+
+
+  
+  
+  
+
+  
+
+
+</body>
+</html>
