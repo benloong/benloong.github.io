@@ -216,6 +216,129 @@
             
               
                 
+                <a class="post-title-link" href="/2016/11/24/intro-ue4-task-graph-system/" itemprop="url">
+                  虚幻4 Task Graph System 介绍
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-11-25T01:36:17+08:00" content="2016-11-25">
+              2016-11-25
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/UE4/" itemprop="url" rel="index">
+                    <span itemprop="name">UE4</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/11/24/intro-ue4-task-graph-system/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/11/24/intro-ue4-task-graph-system/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p><img src="https://cloud.githubusercontent.com/assets/1171605/20613841/d16c129e-b302-11e6-991a-4d799ed7c2d7.png" alt="taskgraphsystemuml"></p>
+<h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>Task Graph System是虚幻4核心模块中的一层抽象任务处理系统，<br>通过该基础设施，我们可以创建任意多线程任务， 异步任务， 序列任务， 并行任务等，并可以指定任务顺序， 设置任务间的依赖， 最终形成一个任务图， 该系统按照设定好的依赖关系来分配任务图中的任务到各个线程中执行， 最终执行完整个任务图。 </p>
+<h2 id="Thread"><a href="#Thread" class="headerlink" title="Thread"></a>Thread</h2><p>引擎会根据平台多线程支持情况创建一组线程。在支持多线程的平台上，通常会各有一个NamedThread，多个AnyThread。<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">namespace</span> ENamedThreads</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">enum</span> Type</span><br><span class="line">	&#123;</span><br><span class="line">		UnusedAnchor = <span class="number">-1</span>,</span><br><span class="line">		<span class="comment">/** The always-present, named threads are listed next **/</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> STATS</span></span><br><span class="line">		StatsThread, </span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">		RHIThread, <span class="comment">// 创建一个</span></span><br><span class="line">		AudioThread, <span class="comment">// 创建一个</span></span><br><span class="line">		GameThread,  <span class="comment">// 创建一个</span></span><br><span class="line">		<span class="comment">// 不支持多线程的平台（如HTML5) 渲染线程为GameThread, 支持多线程的平台 渲染线程为ActualRenderingThread</span></span><br><span class="line">		ActualRenderingThread = GameThread + <span class="number">1</span>, <span class="comment">// 创建一个</span></span><br><span class="line">		<span class="comment">// CAUTION ThreadedRenderingThread must be the last named thread, insert new named threads before it</span></span><br><span class="line"></span><br><span class="line">		<span class="comment">/** not actually a thread index. Means "Unknown Thread" or "Any Unnamed Thread" **/</span></span><br><span class="line">		AnyThread = <span class="number">0xff</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="Task"><a href="#Task" class="headerlink" title="Task"></a>Task</h2><p>模板类<code>TGraphTask&lt;TTask&gt;</code> 中类型参数<code>TTask</code>应提供下面几个函数</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> TTask &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="function">IStatId <span class="title">GetStatId</span><span class="params">()</span> <span class="keyword">const</span></span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 在哪个线程执行该任务？ NamedThread 或 AnyThread</span></span><br><span class="line">    [<span class="keyword">static</span>] ENamedThreads::<span class="function">Type <span class="title">GetDesiredThread</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="comment">/*</span><br><span class="line">    namespace ESubsequentsMode</span><br><span class="line">	&#123;</span><br><span class="line">		enum Type</span><br><span class="line">		&#123;</span><br><span class="line">			// 存在后续任务</span><br><span class="line">			TrackSubsequents,</span><br><span class="line">			// 没有后续任务依赖该任务</span><br><span class="line">			FireAndForget</span><br><span class="line">		&#125;;</span><br><span class="line">	&#125;</span><br><span class="line">	*/</span></span><br><span class="line">    <span class="keyword">static</span> ESubsequentsMode::<span class="function">Type <span class="title">GetSubsequentsMode</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="comment">//在该函数中执行具体任务内容</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span>  <span class="title">DoTask</span><span class="params">(ENamedThreads::Type, <span class="keyword">const</span> FGraphEventRef&amp;)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>FTaskGraphInterface</code>为Task Graph System接口， 负责调度执行任务<br><code>FGraphEvent</code> 维护后继任务列表,<br><code>TGraphTask&lt;TTask&gt;</code>中静态函数<code>CreateTask</code>创建<code>TTask</code>实例， 调用 <code>FTaskGraphInterface::QueueTask</code>分派任务</p>
+<p><code>FTaskGraphInterface</code>对用户透明，通常使用TGraphTask<ttask>::CreateTask()创建任务</ttask></p>
+<h2 id="定义任务类"><a href="#定义任务类" class="headerlink" title="定义任务类"></a>定义任务类</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> FHeavyTask &#123;</span><br><span class="line">    <span class="function">IStatId <span class="title">GetStatId</span><span class="params">()</span> <span class="keyword">const</span> </span>&#123;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h2 id="几个包装好的实用函数"><a href="#几个包装好的实用函数" class="headerlink" title="几个包装好的实用函数"></a>几个包装好的实用函数</h2><p>引擎提供了几个便利函数，我们就不用自己定义TTask类。<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">void ParallelFor(int32 Num, TFunctionRef&lt;void(int32)&gt; Body, bool bForceSingleThread = false);</span><br><span class="line"></span><br><span class="line">void ParallelForWithPreWork(int32 Num, TFunctionRef&lt;void(int32)&gt; Body TFunctionRef&lt;void()&gt; CurrentThreadWorkToDoBeforeHelping, bool bForceSingleThread = false);</span><br><span class="line"></span><br><span class="line">void AsyncTask(ENamedThreads::Type Thread, TFunction&lt;void()&gt; Function);</span><br></pre></td></tr></table></figure></p>
+<h2 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h2>
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/03/27/unity-coroutine-internal/" itemprop="url">
                   Unity协程的内部实现分析并模拟实现
                 </a>
@@ -971,7 +1094,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">6</span>
+              <span class="site-state-item-count">7</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -979,7 +1102,7 @@
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-count">3</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -988,7 +1111,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-count">5</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
